@@ -3,40 +3,36 @@ import argparse
 from PIL import Image
 
 
-def resize_image(path_to_original, path_to_result):
-    img = Image.open(args.filename)
-    width, height = img.size
-    file_format = img.format
-    if args.scale:
-        width = int(width * args.scale)
-        height = int(height * args.scale)
-    elif args.width and args.height:
-        if width/height != args.width/args.height:
-            print ('Обработаное избражение будет с нарушением пропорций')
-        width, height = (args.width, args.height)
-    elif args.width:
-        ratio = int(args.width / width)
-        width, height = (args.width, height * ratio)
-    elif args.height:
-        ratio = int(args.height / height)
-        width, height = (width * ratio, args.height)
+def open_image(path_to_original):
+    image = Image.open(args.filename)
+    return image
+
+
+def resize_image(image, scale, width, height):
+    if scale:
+        new_width = int(image.width * scale)
+        new_height = int(image.height * scale)
+    elif width and height:
+        new_width, new_height = (width, height)
+    elif width:
+        ratio = (width / image.width)
+        new_width, new_height = (width, int(image.height * ratio))
+    elif height:
+        ratio = (height / image.height)
+        new_width, new_height = (int(image.width * ratio), height)
+    return new_width, new_height
+
+
+def prepare_to_save(size, path_to_original, path_to_result):
     if args.output:
         file_name = os.path.basename(args.filename)
         file_path = os.path.dirname(args.output)
-        result = '{}/{}'.format(file_path, file_name)
     else:
         file_name = os.path.splitext(args.filename)[0]
+        file_ext = os.path.splitext(args.filename)[1]
         file_path = os.path.dirname(args.filename)
-        if not file_path:
-            file_path = os.getcwd()
-        result = '{}/{}__{}x{}.{}'.format(
-                                          file_path,
-                                          file_name,
-                                          width,
-                                          height,
-                                          file_format
-                                          )
-    return img, width, height, result
+        file_name = '{}__{}x{}{}'.format(file_name, size[0], size[1], file_ext)
+    return os.path.join(file_path, file_name)
 
 
 if __name__ == '__main__':
@@ -56,10 +52,16 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if not args.filename:
         print ('Необходимо указать исходный файл')
+    elif not (args.scale or args.width or args.height):
+        print ('Размер изображения не изменяется')
     else:
+        image = open_image(args.filename)
         if args.scale and (args.width or args.height):
             print ('Используйте либо ключ scale, либо ключи width/height')
-        else:
-            img_res = resize_image(args.filename, args.output)
-            img = img_res[0].resize((img_res[1], img_res[2]), Image.ANTIALIAS)
-            img.save(img_res[3], mode='RGBA')
+        elif args.width and args.height:
+            if input_image.width/input_image.height != args.width/args.height:
+                print ('Обработаное избражение будет с нарушением пропорций')
+        new_size = resize_image(image, args.scale, args.width, args.height)
+        path_to_save = prepare_to_save(new_size, args.filename, args.output)
+        output_image = image.resize(new_size, Image.ANTIALIAS)
+        output_image.save(path_to_save, mode='RGBA')
