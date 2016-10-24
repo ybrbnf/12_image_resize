@@ -23,7 +23,7 @@ def resize_image(image, scale, width, height):
     return new_width, new_height
 
 
-def prepare_to_save(size, path_to_original, path_to_result):
+def get_name_of_new_image(size, path_to_original, path_to_result):
     if args.output:
         file_name = os.path.basename(args.filename)
         file_path = os.path.dirname(args.output)
@@ -62,6 +62,6 @@ if __name__ == '__main__':
             if input_image.width/input_image.height != args.width/args.height:
                 print ('Обработаное избражение будет с нарушением пропорций')
         new_size = resize_image(image, args.scale, args.width, args.height)
-        path_to_save = prepare_to_save(new_size, args.filename, args.output)
+        path_to_save = get_name_of_new_image(new_size, args.filename, args.output)
         output_image = image.resize(new_size, Image.ANTIALIAS)
         output_image.save(path_to_save, mode='RGBA')
