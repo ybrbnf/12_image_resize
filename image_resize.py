@@ -4,7 +4,7 @@ from PIL import Image
 
 
 def open_image(path_to_original):
-    image = Image.open(args.filename)
+    image = Image.open(path_to_original)
     return image
 
 
@@ -25,12 +25,12 @@ def resize_image(image, scale, width, height):
 
 def get_name_of_new_image(size, path_to_original, path_to_result):
     if args.output:
-        file_name = os.path.basename(args.filename)
-        file_path = os.path.dirname(args.output)
+        file_name = os.path.basename(path_to_original)
+        file_path = os.path.dirname(path_to_result)
     else:
-        file_name = os.path.splitext(args.filename)[0]
-        file_ext = os.path.splitext(args.filename)[1]
-        file_path = os.path.dirname(args.filename)
+        file_name = os.path.splitext(path_to_original)[0]
+        file_ext = os.path.splitext(path_to_original)[1]
+        file_path = os.path.dirname(path_to_original)
         file_name = '{}__{}x{}{}'.format(file_name, size[0], size[1], file_ext)
     return os.path.join(file_path, file_name)
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
         if args.scale and (args.width or args.height):
             print ('Используйте либо ключ scale, либо ключи width/height')
         elif args.width and args.height:
-            if input_image.width/input_image.height != args.width/args.height:
+            if image.width/image.height != args.width/args.height:
                 print ('Обработаное избражение будет с нарушением пропорций')
         new_size = resize_image(image, args.scale, args.width, args.height)
         path_to_save = get_name_of_new_image(new_size, args.filename, args.output)
